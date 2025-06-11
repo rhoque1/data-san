@@ -7,23 +7,27 @@ Prerequisites
 
 Operating System: Windows 10 or 11
 Rust: Install via rustup by running:
-powershellcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+powershell
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup update
 
 Node.js: Download and install the LTS version from nodejs.org
 Git: Install from git-scm.com
 Tauri CLI: Install with:
-powershellcargo install tauri-cli --version "^1.5"
+powershell
+cargo install tauri-cli --version "^1.5"
 
 
 Installation
 
 Clone the repository to your local machine:
-powershellgit clone https://github.com/rhoque1/data-san.git
+powershell
+git clone https://github.com/rhoque1/data-san.git
 cd data-san
 
 Install project dependencies:
-powershellnpm install
+powershell
+npm install
 cd src-tauri
 cargo check
 cd ..
@@ -32,11 +36,13 @@ cd ..
 Running the App
 
 Open PowerShell as Administrator:
-powershellStart-Process powershell -Verb RunAs
+powershell
+Start-Process powershell -Verb RunAs
 cd data-san
 
 Build and run the application:
-powershellnpm run build
+powershell
+npm run build
 npm run tauri dev
 
 
