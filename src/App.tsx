@@ -9,6 +9,9 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [safetyResult, setSafetyResult] = useState<string>('');
   const [sanitizeResult, setSanitizeResult] = useState<string>('');
+  const [systemSpecs, setSystemSpecs] = useState<any | null>(null);
+  const [specsError, setSpecsError] = useState<string>("");
+  const [displayResolution, setDisplayResolution] = useState<string>("");
 
   useEffect(() => {
     if (window.__TAURI__) {
@@ -16,6 +19,10 @@ function App() {
     } else {
       setTestResult('❌ ERROR: Not running in Tauri context - use "npm run tauri dev"');
     }
+  }, []);
+
+  useEffect(() => {
+    setDisplayResolution(`${window.screen.width} x ${window.screen.height}`);
   }, []);
 
   const testConnection = async () => {
@@ -91,6 +98,19 @@ function App() {
     }
   };
 
+  const getSystemSpecs = async () => {
+    setSpecsError("");
+    setIsLoading(true);
+    try {
+      const specs = await invoke<any>('get_system_specs');
+      setSystemSpecs(specs);
+    } catch (error) {
+      setSpecsError(`❌ Error: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="container">
       <h1>Data Sanitizer Pro - MVP</h1>
@@ -113,6 +133,14 @@ function App() {
           style={{ marginLeft: '10px' }}
         >
           {isLoading ? 'Detecting...' : 'Detect Drives'}
+        </button>
+        <button
+          onClick={getSystemSpecs}
+          disabled={isLoading || !window.__TAURI__}
+          className="test-button"
+          style={{ marginLeft: '10px' }}
+        >
+          {isLoading ? 'Getting Specs...' : 'Get System Specs'}
         </button>
       </div>
       {drives.length > 0 && (
@@ -155,6 +183,31 @@ function App() {
           <p>{sanitizeResult}</p>
         </div>
       )}
+      {systemSpecs && (
+        <div className="info-section">
+          <h3>System Specs</h3>
+          <ul>
+            <li><b>OS Name:</b> {systemSpecs.os_name || 'N/A'}</li>
+            <li><b>OS Version:</b> {systemSpecs.os_version || 'N/A'}</li>
+            <li><b>Kernel Version:</b> {systemSpecs.kernel_version || 'N/A'}</li>
+            <li><b>CPU Brand:</b> {systemSpecs.cpu_brand}</li>
+            <li><b>CPU Cores:</b> {systemSpecs.cpu_cores}</li>
+            <li><b>Total Memory:</b> {Math.round(systemSpecs.total_memory / 1024 / 1024)} GB</li>
+            <li><b>Used Memory:</b> {Math.round(systemSpecs.used_memory / 1024 / 1024)} GB</li>
+            {systemSpecs.gpu_name && (
+              <li><b>GPU:</b> {systemSpecs.gpu_name}</li>
+            )}
+            <li><b>Display Resolution:</b> {displayResolution}</li>
+            {systemSpecs.battery_percentage !== undefined && (
+              <li><b>Battery Percentage:</b> {systemSpecs.battery_percentage.toFixed(1)}%</li>
+            )}
+            {systemSpecs.battery_cycle_count !== undefined && systemSpecs.battery_cycle_count !== null && (
+              <li><b>Battery Cycle Count:</b> {systemSpecs.battery_cycle_count}</li>
+            )}
+          </ul>
+        </div>
+      )}
+      {specsError && <div className="info-section"><p>{specsError}</p></div>}
       <div className="info-section">
         <h3>Development Notes</h3>
         <ul>
